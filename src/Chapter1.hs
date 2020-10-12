@@ -521,7 +521,7 @@ branches because it is an expression and it must always return some value.
   satisfying the check will be returned and, therefore, evaluated.
 -}
 closestToZero :: Int -> Int -> Int
-closestToZero x y = min (abs x) (abs y)
+closestToZero x y = if abs x < abs y then x else y
 
 
 {- |
@@ -556,12 +556,9 @@ Casual reminder about adding top-level type signatures for all functions :)
 -}
 mid :: Int -> Int -> Int -> Int
 mid x y z
-  | x < big && x > small = x
-  | y < big && y > small = y
+  | x < y && x > z || x > y && x < z = x
+  | y < x && y > z || y > x && y < z = y
   | otherwise = z
-  where
-    big = max x (max y z)
-    small = min x (min y z)
 
 {- |
 =⚔️= Task 8
