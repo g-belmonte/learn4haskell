@@ -352,8 +352,10 @@ ghci> :l src/Chapter2.hs
 -}
 subList :: Int -> Int -> [a] -> [a]
 subList _ _ [] = []
-subList _ 0 _ = []
-subList d t list = take t . drop d $ list
+subList low high list
+  | low > high || low < 0 || high < 0 = []
+  | otherwise = take (high-low) . drop low $ list
+
 
 {- |
 =⚔️= Task 4
