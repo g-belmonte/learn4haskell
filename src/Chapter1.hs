@@ -556,8 +556,8 @@ Casual reminder about adding top-level type signatures for all functions :)
 -}
 mid :: Int -> Int -> Int -> Int
 mid x y z
-  | x < big && x >= small = x
-  | y < big && y >= small = y
+  | x < big && x > small = x
+  | y < big && y > small = y
   | otherwise = z
   where
     big = max x (max y z)
