@@ -354,7 +354,7 @@ subList :: Int -> Int -> [a] -> [a]
 subList _ _ [] = []
 subList low high list
   | low > high || low < 0 || high < 0 = []
-  | otherwise = take (high-low) . drop low $ list
+  | otherwise = take (high - low + 1) . drop low $ list
 
 
 {- |
