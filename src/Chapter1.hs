@@ -573,8 +573,13 @@ True
 False
 -}
 isVowel :: Char -> Bool
-isVowel c =
-  c `elem` ['a', 'e', 'i', 'o', 'u']
+isVowel c
+  | c == 'a' = True
+  | c == 'e' = True
+  | c == 'i' = True
+  | c == 'o' = True
+  | c == 'u' = True
+  | otherwise = False
 
 
 {- |
@@ -640,9 +645,7 @@ specifying complex expressions.
 sumLast2 :: Int -> Int
 sumLast2 n
   | num < 10 = num
-  | otherwise = num `rem` 10 + (num `div` 10) `rem` 10
-  where
-    num = abs n
+  | otherwise = lastDigit n + lastDigit (n `div` 10)
 
 
 {- |
