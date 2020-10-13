@@ -644,7 +644,7 @@ specifying complex expressions.
 -}
 sumLast2 :: Int -> Int
 sumLast2 n
-  | num < 10 = num
+  | abs n < 10 = abs n
   | otherwise = lastDigit n + lastDigit (n `div` 10)
 
 
