@@ -1105,7 +1105,7 @@ nextDay weekday
   | otherwise = succ weekday
 
 daysToParty :: Weekday -> Int
-daysToParty weekday = (fromEnum Friday - fromEnum weekday) `mod` (maxBound + 1)
+daysToParty weekday = (fromEnum Friday - fromEnum weekday) `mod` 7
 
 {-
 =💣= Task 9*
