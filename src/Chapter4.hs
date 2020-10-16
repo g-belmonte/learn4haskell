@@ -634,8 +634,7 @@ Implement the 'Monad' instance for our lists.
 -}
 concatList :: List (List a) -> List a
 concatList Empty = Empty
-concatList (Cons x Empty) = x
-concatList (Cons x (Cons y ys)) = x <> y <> concatList ys
+concatList (Cons x xs) = x <> concatList xs
 
 instance Monad List where
   (>>=) :: List a -> (a -> List b) -> List b
