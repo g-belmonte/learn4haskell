@@ -116,7 +116,7 @@ the output in here:
 >>> :k Char
 Char :: *
 >>> :k Bool
-Bool "" *
+Bool :: *
 >>> :k [Int]
 [Int] :: *
 >>> :k []
