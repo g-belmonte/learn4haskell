@@ -114,23 +114,23 @@ As always, try to guess the output first! And don't forget to insert
 the output in here:
 
 >>> :k Char
-
+Char :: *
 >>> :k Bool
-
+Bool :: *
 >>> :k [Int]
-
+[Int] :: *
 >>> :k []
-
+[] :: * -> *
 >>> :k (->)
-
+(->) :: * -> * -> *
 >>> :k Either
-
+Either :: * -> * -> *
 >>> data Trinity a b c = MkTrinity a b c
 >>> :k Trinity
-
+Trinity :: * -> * -> * -> *
 >>> data IntBox f = MkIntBox (f Int)
 >>> :k IntBox
-
+IntBox :: (* -> *) -> *
 -}
 
 {- |
@@ -266,6 +266,8 @@ instance Functor Maybe where
     fmap f (Just a) = Just (f a)
     fmap _ x = x
 @
+> Maybe ANSWER: Because `x` has type `Maybe a` and the output must be
+of type `Maybe b`
 -}
 
 {- |
@@ -293,7 +295,8 @@ values and apply them to the type level?
 -}
 instance Functor (Secret e) where
     fmap :: (a -> b) -> Secret e a -> Secret e b
-    fmap = error "fmap for Box: not implemented!"
+    fmap f (Reward a) = Reward (f a)
+    fmap _ (Trap e) = Trap e
 
 {- |
 =⚔️= Task 3
@@ -306,6 +309,11 @@ typeclasses for standard data types.
 data List a
     = Empty
     | Cons a (List a)
+
+instance Functor List where
+  fmap :: (a -> b) -> List a -> List b
+  fmap _ Empty = Empty
+  fmap f (Cons head tail) = Cons (f head) (fmap f tail)
 
 {- |
 =🛡= Applicative
@@ -472,10 +480,11 @@ Implement the Applicative instance for our 'Secret' data type from before.
 -}
 instance Applicative (Secret e) where
     pure :: a -> Secret e a
-    pure = error "pure Secret: Not implemented!"
+    pure = Reward
 
     (<*>) :: Secret e (a -> b) -> Secret e a -> Secret e b
-    (<*>) = error "(<*>) Secret: Not implemented!"
+    Trap e <*> _ = Trap e
+    Reward f <*> x = fmap f x
 
 {- |
 =⚔️= Task 5
@@ -488,7 +497,19 @@ Implement the 'Applicative' instance for our 'List' type.
   may also need to implement a few useful helper functions for our List
   type.
 -}
+instance Semigroup (List a) where
+  (<>) :: List a -> List a -> List a
+  Empty <> xs = xs
+  Cons x xs <> ys = Cons x (xs <> ys)
 
+instance Applicative List where
+  pure :: a -> List a
+  pure a = Cons a Empty
+
+  (<*>) :: List (a -> b) -> List a -> List b
+  Empty <*> _ = Empty
+  _ <*> Empty = Empty
+  (Cons f fs) <*> xs = fmap f xs <> (fs <*> xs)
 
 {- |
 =🛡= Monad
@@ -600,7 +621,8 @@ Implement the 'Monad' instance for our 'Secret' type.
 -}
 instance Monad (Secret e) where
     (>>=) :: Secret e a -> (a -> Secret e b) -> Secret e b
-    (>>=) = error "bind Secret: Not implemented!"
+    Reward a >>= f = f a
+    Trap e >>= _ = Trap e
 
 {- |
 =⚔️= Task 7
@@ -610,7 +632,13 @@ Implement the 'Monad' instance for our lists.
 🕯 HINT: You probably will need to implement a helper function (or
   maybe a few) to flatten lists of lists to a single list.
 -}
+concatList :: List (List a) -> List a
+concatList Empty = Empty
+concatList (Cons x xs) = x <> concatList xs
 
+instance Monad List where
+  (>>=) :: List a -> (a -> List b) -> List b
+  xs >>= f = concatList (fmap f xs)
 
 {- |
 =💣= Task 8*: Before the Final Boss
@@ -629,7 +657,7 @@ Can you implement a monad version of AND, polymorphic over any monad?
 🕯 HINT: Use "(>>=)", "pure" and anonymous function
 -}
 andM :: (Monad m) => m Bool -> m Bool -> m Bool
-andM = error "andM: Not implemented!"
+andM b1 b2 = b1 >>= \b -> if b then b2 else pure False
 
 {- |
 =🐉= Task 9*: Final Dungeon Boss
@@ -672,8 +700,26 @@ Specifically,
    subtree of a tree
  ❃ Implement the function to convert Tree to list
 -}
+data Tree a
+  = Leaf a
+  | Node (Tree a) (Tree a)
 
+instance Functor Tree where
+    fmap :: (a -> b) -> Tree a -> Tree b
+    fmap f (Leaf a) = Leaf (f a)
+    fmap f (Node l r) = Node (fmap f l) (fmap f r)
 
+reverseTree :: Tree a -> Tree a
+reverseTree (Leaf a) = Leaf a
+reverseTree (Node l r) = Node (reverseTree r) (reverseTree l)
+
+treeToList :: Tree a -> [a]
+treeToList (Leaf a) = [a]
+treeToList (Node l r) = treeToList l <> treeToList r
+
+treeToList' :: Tree a -> List a
+treeToList' (Leaf a) = Cons a Empty
+treeToList' (Node l r) = treeToList' l <> treeToList' r
 {-
 You did it! Now it is time to open pull request with your changes
 and summon @vrom911 and @chshersh for the review!
